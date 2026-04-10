@@ -458,7 +458,6 @@ function calcScore(assessment, answers) {
 // ── Claude AI caller — fully robust ───────────────────────────────────────
 // ── Gemini AI caller — fixed & production-safe ────────────────────────────
 async function callClaude(prompt, maxTokens = 2500) {
-  console.log("KEY:", import.meta.env.VITE_GOOGLE_API_KEY);
   const key = import.meta.env.VITE_GOOGLE_API_KEY;
 
   if (!key) {
@@ -466,7 +465,7 @@ async function callClaude(prompt, maxTokens = 2500) {
   }
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
     {
       method: "POST",
       headers: {
@@ -493,10 +492,9 @@ async function callClaude(prompt, maxTokens = 2500) {
 
   const data = await res.json();
 
-  const text =
-    data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI";
-
-  return text;
+  return (
+    data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI"
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════
