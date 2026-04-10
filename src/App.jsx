@@ -902,7 +902,7 @@ function ReportPanel({ report, loading, onGenerate, hasData, error }) {
             {error.includes("MISSING_KEY") && (
               <p className="report-error-tip">
                 Add VITE_GOOGLE_API_KEY: Netlify → Site Configuration →
-                Environment Variables → <code>VITE_ANTHROPIC_KEY</code>
+                Environment Variables → <code>VITE_GOOGLE_API_KEY</code>
               </p>
             )}
           </div>
@@ -1536,9 +1536,9 @@ Write comprehensively. Each section should be substantive (minimum 150 words). R
     } catch (err) {
       const msg =
         err.message === "MISSING_KEY"
-          ? "API key not configured. Add VITE_ANTHROPIC_KEY to your Netlify environment variables."
+          ? "API key not configured. Add VITE_GOOGLE_API_KEY to your Netlify environment variables."
           : err.message.includes("401")
-            ? "Invalid API key. Check your VITE_ANTHROPIC_KEY value at console.anthropic.com."
+            ? "Invalid API key. Check your VITE_GOOGLE_API_KEY value at console.anthropic.com."
             : err.message.includes("429")
               ? "Rate limit reached. Wait a moment and try again."
               : err.message;
@@ -1590,7 +1590,7 @@ Respond with empathy, evidence-based information, and practical suggestions. Be 
     } catch (err) {
       const errMsg =
         err.message === "MISSING_KEY"
-          ? "Please add your API key (VITE_ANTHROPIC_KEY) to use the AI chat."
+          ? "Please add your API key (VITE_GOOGLE_API_KEY) to use the AI chat."
           : "Failed to get response: " + err.message;
       const msgs = [...upd, { role: "assistant", content: errMsg }];
       setChatMsgs(msgs);
