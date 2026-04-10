@@ -1057,41 +1057,7 @@ function parseReport(text) {
 }
 
 // ── LocalStorage API wrapper ───────────────────────────────────────────────
-async function callClaude(prompt) {
-  const key = import.meta.env.VITE_GOOGLE_API_KEY;
 
-  if (!key) {
-    throw new Error("MISSING_KEY");
-  }
-
-  const res = await fetch(
-    `https://api.generativeai.google.com/v1/models/gemini-pro:generateContent?key=${key}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }],
-          },
-        ],
-      }),
-    },
-  );
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`API error ${res.status}: ${errText}`);
-  }
-
-  const data = await res.json();
-
-  return (
-    data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI"
-  );
-}
 // ══════════════════════════════════════════════════════════════════════════
 // MAIN APPLICATION
 // ══════════════════════════════════════════════════════════════════════════
