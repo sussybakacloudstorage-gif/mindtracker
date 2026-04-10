@@ -458,6 +458,7 @@ function calcScore(assessment, answers) {
 // ── Claude AI caller — fully robust ───────────────────────────────────────
 // ── Gemini AI caller — fixed & production-safe ────────────────────────────
 async function callClaude(prompt, maxTokens = 2500) {
+  console.log("KEY:", import.meta.env.VITE_GOOGLE_API_KEY);
   const key = import.meta.env.VITE_GOOGLE_API_KEY;
 
   if (!key) {
