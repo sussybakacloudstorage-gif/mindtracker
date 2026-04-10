@@ -465,7 +465,7 @@ async function callClaude(prompt, maxTokens = 2500) {
   }
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`,
     {
       method: "POST",
       headers: {
