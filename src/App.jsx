@@ -457,7 +457,7 @@ function calcScore(assessment, answers) {
 
 // ── Claude AI caller — fully robust ───────────────────────────────────────
 // ── Gemini AI caller — fixed & production-safe ────────────────────────────
-async function callClaude(prompt, maxTokens = 2500) {
+async function callClaude(prompt, maxTokens = 1000) {
   const key = import.meta.env.VITE_GOOGLE_API_KEY;
 
   if (!key) {
@@ -465,7 +465,7 @@ async function callClaude(prompt, maxTokens = 2500) {
   }
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
+    `https://api.generativeai.google.com/v1/models/gemini-pro:generateContent?key=${key}`,
     {
       method: "POST",
       headers: {
@@ -477,6 +477,9 @@ async function callClaude(prompt, maxTokens = 2500) {
             parts: [{ text: prompt }],
           },
         ],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+        },
       }),
     },
   );
@@ -1054,21 +1057,41 @@ function parseReport(text) {
 }
 
 // ── LocalStorage API wrapper ───────────────────────────────────────────────
-async function callAPI(endpoint, method = "GET", body = null) {
-  const base = import.meta.env.VITE_API_BASE;
-  if (!base) return null;
-  const opts = { method, headers: { "Content-Type": "application/json" } };
-  const tk = localStorage.getItem("mt_token");
-  if (tk) opts.headers["Authorization"] = `Bearer ${tk}`;
-  if (body) opts.body = JSON.stringify(body);
-  try {
-    const r = await fetch(`${base}/api${endpoint}`, opts);
-    return await r.json();
-  } catch {
-    return null;
-  }
-}
+async function callClaude(prompt) {
+  const key = import.meta.env.VITE_GOOGLE_API_KEY;
 
+  if (!key) {
+    throw new Error("MISSING_KEY");
+  }
+
+  const res = await fetch(
+    `https://api.generativeai.google.com/v1/models/gemini-pro:generateContent?key=${key}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`API error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+
+  return (
+    data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from AI"
+  );
+}
 // ══════════════════════════════════════════════════════════════════════════
 // MAIN APPLICATION
 // ══════════════════════════════════════════════════════════════════════════
@@ -1516,30 +1539,6 @@ Professional clinical impression paragraph — as would appear in an actual clin
 Standard disclaimer about AI limitations and the necessity of consulting a licensed mental health professional.
 
 Write comprehensively. Each section should be substantive (minimum 150 words). Reference specific scores, specific journal quotes, and specific patterns throughout.`;
-
-    try {
-      const text = await callClaude(prompt, 3000);
-      if (!text || text.trim().length < 100)
-        throw new Error(
-          "Report was generated but appears empty. This may indicate an API configuration issue.",
-        );
-      setReport(text);
-      sls("rep", text);
-      if (dbMode) await callAPI("/report", "POST", { content: text });
-      showMsg("Clinical report generated ✓");
-    } catch (err) {
-      const msg =
-        err.message === "MISSING_KEY"
-          ? "API key not configured. Add VITE_GOOGLE_API_KEY to your Netlify environment variables."
-          : err.message.includes("401")
-            ? "Invalid API key. Check your VITE_GOOGLE_API_KEY value at console.anthropic.com."
-            : err.message.includes("429")
-              ? "Rate limit reached. Wait a moment and try again."
-              : err.message;
-      setReportError(msg);
-      showMsg("❌ " + msg.slice(0, 60));
-    }
-    setReportLoading(false);
   }
 
   // ── AI Chat ────────────────────────────────────────────────────────────
